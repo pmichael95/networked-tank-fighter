@@ -49,117 +49,11 @@ public class Pathfinding : MonoBehaviour
     /// </summary>
     public void ComputePath()
     {
-        // Clear displayed paths, if any
-        ClearDisplayedPath();
-
         // Clear the lists first
         ClearTheLists();
 
-        // Select which algorithm we use
-        switch (GameController.currentAlgorithm)
-        {
-            case GameController.AlgorithmChoice.Dijkstra:
-                // Call Dijkstra's
-                DijkstrasAlgorithm();
-                break;
-            case GameController.AlgorithmChoice.AStar:
-                // Call A*
-                AStarAlgorithm();
-                break;
-            case GameController.AlgorithmChoice.Cluster:
-                // Call Cluster
-                ClusterAlgorithm();
-                break;
-            default:
-                Debug.LogError("ERROR::UNKNWON_CURRENT_ALGORITHM");
-                break;
-        }
-
-        // Finally display the path
-        DisplayPath();
-    }
-
-    /// <summary>
-    /// Dijkstra's path finding algorithm with null heuristic.
-    /// </summary>
-    private void DijkstrasAlgorithm()
-    {
-        // Find closest node to the character
-        // By default the character will never be too far from a node.
-        GameObject closestNode = GetClosestNode();
-        startNode = closestNode;
-
-        if (closestNode == null)
-        {
-            Debug.LogError("ERROR::UNKNOWN_CLOSEST_NODE_TO_PLAYER");
-            return;
-        }
-
-        // Add this closest node to the Open List
-        openList.Add(closestNode);
-
-        // While we still have nodes in the openlist, and the current node is not the goal...
-        while (openList.Count > 0 && openList[0] != goalNode)
-        {
-            DijkstraVisitNode(openList[0]); // Visit the next node in the open list sequentially
-        }
-
-        // Compute the path list
-        ComputePathList();
-    }
-
-    /// <summary>
-    /// Dijkstra node visit algorithm.
-    /// </summary>
-    /// <param name="node">The node we're currently visiting.</param>
-    private void DijkstraVisitNode(GameObject node)
-    {
-        // Now that we're visiting this node, add it to the closed list
-        closedList.Add(node);
-        // As such, remove it from the open list
-        openList.Remove(node);
-
-        // Acquire the neighboring nodes
-        List<GameObject> neighbors = node.GetComponent<NodeNeighbors>().GetNeighbors();
-
-        foreach (GameObject currNeighbor in neighbors)
-        {
-            NodeNeighbors currentNode = currNeighbor.GetComponent<NodeNeighbors>();
-            float distance = (currNeighbor.transform.position - node.transform.position).magnitude;
-            float costSoFar = node.GetComponent<NodeNeighbors>().costSoFar + distance;
-            float heuristic = 0.0f; // 0 heuristic for Dijkstra's algorithm since it's basically A* but with no h(n)
-            float totalEstimateVal = costSoFar + heuristic;
-
-            bool isInClosedList = closedList.Contains(currNeighbor);
-            bool isInOpenList = openList.Contains(currNeighbor);
-
-            if (isInClosedList && (totalEstimateVal < currentNode.totalEstimateVal))
-            {
-                // Update the current node's attributes
-                UpdateNodeValues(currentNode, costSoFar, totalEstimateVal, heuristic, node);
-
-                // Remove it from the closed list
-                closedList.Remove(currNeighbor);
-                // Add it to the open list
-                openList.Add(currNeighbor);
-            }
-            else if (isInOpenList && (totalEstimateVal < currentNode.totalEstimateVal))
-            {
-                // Update the current node's attributes
-                UpdateNodeValues(currentNode, costSoFar, totalEstimateVal, heuristic, node);
-            }
-            else if (!isInClosedList && !isInOpenList)
-            {
-                // Update the current node's attributes
-                UpdateNodeValues(currentNode, costSoFar, totalEstimateVal, heuristic, node);
-
-                // Add it to the open list
-                openList.Add(currNeighbor);
-            }
-        }
-
-        // Sort the open list
-        openList.Sort((GameObject n, GameObject m) => { return n.GetComponent<NodeNeighbors>().costSoFar.CompareTo(m.GetComponent<NodeNeighbors>().costSoFar); });
+        // Run A*
+        AStarAlgorithm();
     }
 
     /// <summary>
@@ -246,80 +140,6 @@ public class Pathfinding : MonoBehaviour
 
         // Sort the open list
         openList.Sort((GameObject n, GameObject m) => { return n.GetComponent<NodeNeighbors>().costSoFar.CompareTo(m.GetComponent<NodeNeighbors>().costSoFar); });
-    }
-
-    /// <summary>
-    /// The cluster search algorithm.
-    /// </summary>
-    private void ClusterAlgorithm()
-    {
-        // First find closest node
-        GameObject closestNode = GetClosestNode();
-        startNode = closestNode;
-
-        // Get the clusters of our start and goal nodes
-        Cluster startCluster = startNode.GetComponent<NodeNeighbors>().cluster;
-        Cluster targetCluster = goalNode.GetComponent<NodeNeighbors>().cluster;
-
-        // If they're in the SAME cluster, just do regular A*
-        if (startCluster == targetCluster)
-        {
-            AStarAlgorithm();
-        }
-        else
-        {
-            // Else they're in different clusters
-
-            // Find the cluster path
-            List<GameObject> clusterPath = new List<GameObject>();
-
-            if (startCluster.pathToCluster.TryGetValue(targetCluster, out clusterPath))
-            {
-                // Backups
-                GameObject _start = startNode;
-                GameObject _goal = goalNode;
-
-                // Clear lists
-                ClearTheLists();
-
-                // Acquire beginning open and closed lists from an A* search
-                List<GameObject> begin = ComputeAStar(_start, clusterPath[0]);
-                List<GameObject> _open = new List<GameObject>(openList);
-                List<GameObject> _closed = new List<GameObject>(closedList);
-
-                // Clear the lists again
-                ClearTheLists();
-
-                // Acquire the goal-side open and closed lists from an A* search
-                List<GameObject> _end = ComputeAStar(clusterPath[clusterPath.Count - 1], _goal);
-                List<GameObject> _endOpen = new List<GameObject>(openList);
-                List<GameObject> _endClosed = new List<GameObject>(closedList);
-
-                // Clear for one final time before setting the paths
-                ClearTheLists();
-
-                // -- Compute the list for the path
-                // Sort the end list
-                _end.Sort((GameObject n, GameObject m) => { return n.GetComponent<NodeNeighbors>().costSoFar.CompareTo(m.GetComponent<NodeNeighbors>().costSoFar); });
-                // Then add it to the path
-                pathList.AddRange(_end);
-
-                // Add the appropriate values to the open list
-                openList.AddRange(_open);
-                openList.AddRange(_endOpen);
-
-                // Add the appropriate values to the closed list
-                closedList.AddRange(_closed);
-                closedList.AddRange(_endClosed);
-
-                // Reset original start and goal nodes
-                startNode = _start;
-                goalNode = _goal;
-
-                // Set the target to arrive to as null since it will be set later
-                GetComponent<Character>().target = null;
-            }
-        }
     }
 
     /// <summary>
@@ -462,33 +282,5 @@ public class Pathfinding : MonoBehaviour
         }
 
         return total;
-    }
-
-    /// <summary>
-    /// Displays (re-enables) visited path nodes.
-    /// </summary>
-    private void DisplayPath()
-    {
-        foreach (GameObject node in pathList)
-        {
-            node.GetComponent<Renderer>().enabled = true;
-            visitedPathList.Add(node);
-        }
-    }
-
-    /// <summary>
-    /// Clears the displayed path if it exists.
-    /// </summary>
-    private void ClearDisplayedPath()
-    {
-        if (visitedPathList.Count > 0)  
-        {
-            foreach (GameObject node in visitedPathList)
-            {
-                node.GetComponent<Renderer>().enabled = false;
-            }
-        }
-        // Finally clear the visited path list
-        visitedPathList.Clear();
     }
 }
