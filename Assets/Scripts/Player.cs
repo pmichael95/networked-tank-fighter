@@ -21,17 +21,15 @@ public class Player : NetworkBehaviour
     /// Spawns a player tank prefab when a player connects.
     /// </summary>
 	void Start () {
-        if (! isLocalPlayer)
-        {
-            // This object belongs to another player
-            return;
-        }
+        if (! isLocalPlayer) return;
 
         // Command the server to spawn a tank
         CmdSpawnTank();
 	}
 	
-	// Update is called once per frame
+	/// <summary>
+	/// Ensures local player authority.
+	/// </summary>
 	void Update () {
 		// Update runs on every computer whether or not they own this particular player
         if (! isLocalPlayer) return;
@@ -51,6 +49,10 @@ public class Player : NetworkBehaviour
         NetworkServer.SpawnWithClientAuthority(tank, connectionToClient);
     }
 
+    /// <summary>
+    /// When we disconnect from the server, destroy the player.
+    /// </summary>
+    /// <param name="player">The networked player.</param>
     private void OnPlayerDisconnected(NetworkPlayer player)
     {
         NetworkServer.Destroy(mTank);
