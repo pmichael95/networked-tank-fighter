@@ -39,6 +39,14 @@ public class Projectile : NetworkBehaviour
     [Command]
     private void CmdDamagePlayer(GameObject playerTank)
     {
-        playerTank.GetComponent<Tank>().playerHealth -= 20;
+        Tank mTank = playerTank.GetComponent<Tank>();
+        if (mTank.hasDMGBoost)
+        {
+            mTank.playerHealth -= 40;
+        }
+        else
+        {
+            mTank.playerHealth -= 20;
+        }
     }
 }

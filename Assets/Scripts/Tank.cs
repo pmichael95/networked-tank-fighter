@@ -15,6 +15,12 @@ public class Tank : NetworkBehaviour
     [Tooltip("The prefab for the tank's projectile when firing.")]
     public GameObject projectilePrefab;
 
+    // --- POWERUP FLAGS --- //
+    // These will identify if the tank has been powered up or not.
+    public bool hasHPBoost { get; set; }
+    public bool hasDMGBoost { get; set; }
+    public bool hasFireRateBoost { get; set; }
+
     [SyncVar(hook = "OnTakeDamage")]
     public int playerHealth = 100; // By default 100HP
     // The instantiated projectile that we shot
@@ -32,6 +38,12 @@ public class Tank : NetworkBehaviour
         if (! hasAuthority) return;
 
         // -- From here on, we have authority
+
+        if (hasHPBoost)
+        {
+            CmdUpdatePlayerHP();
+            hasHPBoost = false;
+        }
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -68,7 +80,7 @@ public class Tank : NetworkBehaviour
     [Command]
     private void CmdSpawnProjectile()
     {
-        if (Time.time > fireRate + lastShot)
+        if (Time.time > fireRate + lastShot && !hasFireRateBoost)
         {
             mProjectile = GameObject.Instantiate(projectilePrefab);
             mProjectile.transform.position = this.transform.position + this.transform.forward; // Offset by adding transform.forward so it won't hit the firing tank
@@ -78,6 +90,24 @@ public class Tank : NetworkBehaviour
             NetworkServer.Spawn(mProjectile);
             lastShot = Time.time;
         }
+        else if (hasFireRateBoost)
+        {
+            mProjectile = GameObject.Instantiate(projectilePrefab);
+            mProjectile.transform.position = this.transform.position + this.transform.forward; // Offset by adding transform.forward so it won't hit the firing tank
+            mProjectile.GetComponent<Rigidbody>().velocity = this.transform.TransformDirection(Vector3.forward * 10.0f);
+
+            // Spawn it on server as well
+            NetworkServer.Spawn(mProjectile);
+        }
+    }
+
+    /// <summary>
+    /// When we have the HP Boost powerup, update HP to 200.
+    /// </summary>
+    [Command]
+    private void CmdUpdatePlayerHP()
+    {
+        this.playerHealth = 200;
     }
 
     /// <summary>

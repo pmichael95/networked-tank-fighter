@@ -54,4 +54,32 @@ public class PowerUp : NetworkBehaviour
             lastBlink = Time.time;
         }
     }
+
+    /// <summary>
+    /// When a powerup collides with a player, enhance them and destroy it.
+    /// </summary>
+    /// <param name="col">The collided player (tank) object.</param>
+    void OnCollisionEnter(Collision col)
+    {
+        Tank mTank = col.gameObject.GetComponent<Tank>();
+        if (mTank)
+        {
+            switch (typeOfPowerUp)
+            {
+                case PowerUpType.DMGBoost:
+                    mTank.hasDMGBoost = true;
+                    break;
+                case PowerUpType.FireRateBoost:
+                    mTank.hasFireRateBoost = true;
+                    break;
+                case PowerUpType.HPBoost:
+                    mTank.hasHPBoost = true;
+                    break;
+                default:
+                    Debug.LogError("ERRORR::UNKNOWN_POWERUP_TYPE_GIVEN");
+                    break;
+            }
+            NetworkServer.Destroy(this.gameObject);
+        }
+    }
 }
