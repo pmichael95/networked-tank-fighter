@@ -21,6 +21,8 @@ public class Tank : NetworkBehaviour
     private GameObject mProjectile;
     // Rotation speed multiplier
     private const float ROT_SPEED = 30.0f;
+    private float fireRate = 1.5f;
+    private float lastShot = 0.0f;
     #endregion
 
     /// <summary>
@@ -66,12 +68,16 @@ public class Tank : NetworkBehaviour
     [Command]
     private void CmdSpawnProjectile()
     {
-        mProjectile = GameObject.Instantiate(projectilePrefab);
-        mProjectile.transform.position = this.transform.position + this.transform.forward; // Offset by adding transform.forward so it won't hit the firing tank
-        mProjectile.GetComponent<Rigidbody>().velocity = this.transform.TransformDirection(Vector3.forward * 10.0f);
+        if (Time.time > fireRate + lastShot)
+        {
+            mProjectile = GameObject.Instantiate(projectilePrefab);
+            mProjectile.transform.position = this.transform.position + this.transform.forward; // Offset by adding transform.forward so it won't hit the firing tank
+            mProjectile.GetComponent<Rigidbody>().velocity = this.transform.TransformDirection(Vector3.forward * 10.0f);
 
-        // Spawn it on server as well
-        NetworkServer.Spawn(mProjectile);
+            // Spawn it on server as well
+            NetworkServer.Spawn(mProjectile);
+            lastShot = Time.time;
+        }
     }
 
     /// <summary>
