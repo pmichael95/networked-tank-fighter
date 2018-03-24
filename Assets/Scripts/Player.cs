@@ -55,17 +55,4 @@ public class Player : NetworkBehaviour
     {
         NetworkServer.Destroy(mTank);
     }
-
-    /// <summary>
-    /// Moves 'this' (mTank) tank on the server.
-    /// </summary>
-    /*
-    [Command]
-    private void CmdMoveTank()
-    {
-        if (mTank == null) return;
-
-        mTank.transform.Translate(0.0f, 0, 0.05f);
-    }
-    */
 }
