@@ -84,6 +84,10 @@ public class Tank : NetworkBehaviour
         {
             mProjectile = GameObject.Instantiate(projectilePrefab);
             mProjectile.transform.position = this.transform.position + this.transform.forward; // Offset by adding transform.forward so it won't hit the firing tank
+            if (hasDMGBoost)
+            {
+                mProjectile.GetComponent<Projectile>().hasDMGBoost = true;
+            }
             mProjectile.GetComponent<Rigidbody>().velocity = this.transform.TransformDirection(Vector3.forward * 10.0f);
 
             // Spawn it on server as well
@@ -94,6 +98,10 @@ public class Tank : NetworkBehaviour
         {
             mProjectile = GameObject.Instantiate(projectilePrefab);
             mProjectile.transform.position = this.transform.position + this.transform.forward; // Offset by adding transform.forward so it won't hit the firing tank
+            if (hasDMGBoost)
+            {
+                mProjectile.GetComponent<Projectile>().hasDMGBoost = true;
+            }
             mProjectile.GetComponent<Rigidbody>().velocity = this.transform.TransformDirection(Vector3.forward * 10.0f);
 
             // Spawn it on server as well
@@ -118,7 +126,7 @@ public class Tank : NetworkBehaviour
         this.playerHealth = HP;
         if (this.playerHealth <= 0)
         {
-            // We died
+            // Destroy the tank
             NetworkServer.Destroy(this.gameObject);
         }
     }

@@ -17,6 +17,9 @@ public class PowerUp : NetworkBehaviour
     [Tooltip("The type that 'this' powerup is of.")]
     public PowerUpType typeOfPowerUp;
 
+    // 0: white, 1: red
+    [SyncVar(hook="OnUpdateColor")] 
+    private int meshColor = 0;
     // The rate to have them blink
     private const float BLINK_RATE = 1.0f;
     private float lastBlink = 0.0f;
@@ -31,11 +34,9 @@ public class PowerUp : NetworkBehaviour
 	}
 	
 	/// <summary>
-	/// If we have authority to, command the server to make it blink
+	/// At each frame, command the server to make it blink.
 	/// </summary>
 	void Update () {
-        if (!hasAuthority) return;
-
         CmdBlink();
 	}
 
@@ -48,10 +49,35 @@ public class PowerUp : NetworkBehaviour
         // This is on the server
         if (Time.time > BLINK_RATE + lastBlink)
         {
-            if (mRenderer.material.color == Color.red) mRenderer.material.color = Color.white;
-            else mRenderer.material.color = Color.red;
+            if (mRenderer.material.color == Color.red)
+            {
+                mRenderer.material.color = Color.white;
+                meshColor = 0;
+            }
+            else
+            {
+                mRenderer.material.color = Color.red;
+                meshColor = 1;
+            }
 
             lastBlink = Time.time;
+        }
+    }
+
+    /// <summary>
+    /// When we update the color on the server side, update it on the client's as well.
+    /// </summary>
+    /// <param name="color">The color that it changed to.</param>
+    private void OnUpdateColor(int color)
+    {
+        meshColor = color;
+        if (meshColor == 0)
+        {
+            mRenderer.material.color = Color.white;
+        }
+        else
+        {
+            mRenderer.material.color = Color.red;
         }
     }
 

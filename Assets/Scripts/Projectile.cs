@@ -11,6 +11,11 @@ public class Projectile : NetworkBehaviour
      **/
     #endregion
 
+    #region VARIABLES
+    [Tooltip("Whether or not this projectile does increased damage.")]
+    public bool hasDMGBoost = false;
+    #endregion
+
     void OnCollisionEnter(Collision col)
     {   
         if (col.gameObject.tag == "Player")
@@ -40,12 +45,14 @@ public class Projectile : NetworkBehaviour
     private void CmdDamagePlayer(GameObject playerTank)
     {
         Tank mTank = playerTank.GetComponent<Tank>();
-        if (mTank.hasDMGBoost)
+        if (hasDMGBoost)
         {
+            // Since we have the DMG boost powerup, we deal double damage.
             mTank.playerHealth -= 40;
         }
         else
         {
+            // Regular damage without powerup.
             mTank.playerHealth -= 20;
         }
     }
