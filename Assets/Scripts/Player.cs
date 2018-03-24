@@ -57,9 +57,15 @@ public class Player : NetworkBehaviour
         NetworkServer.SpawnWithClientAuthority(tank, connectionToClient);
     }
 
+    private void OnPlayerDisconnected(NetworkPlayer player)
+    {
+        NetworkServer.Destroy(mTank);
+    }
+
     /// <summary>
     /// Moves 'this' (mTank) tank on the server.
     /// </summary>
+    /*
     [Command]
     private void CmdMoveTank()
     {
@@ -67,4 +73,5 @@ public class Player : NetworkBehaviour
 
         mTank.transform.Translate(0.0f, 0, 0.05f);
     }
+    */
 }
