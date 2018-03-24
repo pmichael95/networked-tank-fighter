@@ -16,6 +16,8 @@ public class Projectile : NetworkBehaviour
         if (col.gameObject.tag == "Player")
         {
             Debug.Log("COLLIDED WITH PLAYER");
+            if (!hasAuthority) return;
+            // Make sure we have authority, then handle dealing damage
             CmdDamagePlayer(col.gameObject);
         }
         else if (col.gameObject.tag == "Obstacle")

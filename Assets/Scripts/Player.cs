@@ -35,12 +35,6 @@ public class Player : NetworkBehaviour
 	void Update () {
 		// Update runs on every computer whether or not they own this particular player
         if (! isLocalPlayer) return;
-
-        if (Input.GetKey(KeyCode.W))
-        {
-            // Instruct server to move tank
-            // CmdMoveTank();
-        }
 	}
 
     /// <summary>
