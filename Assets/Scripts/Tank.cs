@@ -26,7 +26,7 @@ public class Tank : NetworkBehaviour
     // The instantiated projectile that we shot
     private GameObject mProjectile;
     // Rotation speed multiplier
-    private const float ROT_SPEED = 30.0f;
+    private const float ROT_SPEED = 45.0f;
     private float fireRate = 1.5f;
     private float lastShot = 0.0f;
     #endregion
