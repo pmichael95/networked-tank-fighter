@@ -45,6 +45,10 @@ public class Projectile : NetworkBehaviour
         {
             NetworkServer.Destroy(this.gameObject);
         }
+        else if (col.gameObject.tag == "Enemy")
+        {
+            NetworkServer.Destroy(this.gameObject);
+        }
     }
 
     /// <summary>

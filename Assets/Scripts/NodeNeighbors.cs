@@ -30,7 +30,7 @@ public class NodeNeighbors : MonoBehaviour, System.IComparable<NodeNeighbors>
     /// <summary>
     /// Initializes the neighboring nodes and its cluster.
     /// </summary>
-    void Awake()
+    void Start()
     {
         // Find the node's neighbors first
         FindNeighbors();
