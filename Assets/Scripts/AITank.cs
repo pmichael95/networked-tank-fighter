@@ -25,6 +25,10 @@ public class AITank : NetworkBehaviour {
     private float lastShot = 0.0f;
     #endregion
 
+    /// <summary>
+    /// Acquires the character component of the AI tanks.
+    /// This is used to assign targets, and determine if we can move or not (if in range to shoot).
+    /// </summary>
     void Start()
     {
         mCharacter = GetComponent<Character>();
@@ -58,6 +62,10 @@ public class AITank : NetworkBehaviour {
             {
                 mCharacter.canMove = true;
             }
+        }
+        else
+        {
+            mCharacter.canMove = true;
         }
     }
 

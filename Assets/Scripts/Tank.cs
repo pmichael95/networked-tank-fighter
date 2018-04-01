@@ -26,7 +26,8 @@ public class Tank : NetworkBehaviour
     // The instantiated projectile that we shot
     private GameObject mProjectile;
     // Rotation speed multiplier
-    private const float ROT_SPEED = 45.0f;
+    private const float ROT_SPEED = 60.0f;
+    private const float MOV_SPEED = 0.035f;
     private float fireRate = 1.5f;
     private float lastShot = 0.0f;
     #endregion
@@ -48,12 +49,12 @@ public class Tank : NetworkBehaviour
         if (Input.GetKey(KeyCode.W))
         {
             // Move forward
-            this.transform.Translate(0.0f, 0.0f, 0.025f);
+            this.transform.Translate(0.0f, 0.0f, MOV_SPEED);
         }
         else if (Input.GetKey(KeyCode.S))
         {
             // Move backwards
-            this.transform.Translate(0.0f, 0.0f, -0.025f);
+            this.transform.Translate(0.0f, 0.0f, -MOV_SPEED);
         }
         
         if (Input.GetKey(KeyCode.A))

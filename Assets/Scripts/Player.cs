@@ -15,6 +15,7 @@ public class Player : NetworkBehaviour
     [Tooltip("The player's tank object prefab that is created on launch of the networked game.")]
     public GameObject playerTankPrefab;
     private GameObject mTank;
+    private SpawnPoints mSpawnPoints; // The spawn points available to us
     #endregion
 
     /// <summary>
@@ -41,8 +42,16 @@ public class Player : NetworkBehaviour
     [Command]
     private void CmdSpawnTank()
     {
+        // Acquire the spawnPoints object
+        mSpawnPoints = GameObject.Find("SpawnPoints").GetComponent<SpawnPoints>();
+        // Acquire a spawn position
+        Transform spawnPos = mSpawnPoints.GetFreeSpawnPoint();
         // On server so spawn tank for the connected player
         GameObject tank = GameObject.Instantiate(playerTankPrefab);
+        // Set the tank's transform to the spawnPos
+        tank.transform.position = spawnPos.position;
+        tank.transform.rotation = spawnPos.rotation;
+        // Then set the player's tank to it
         mTank = tank;
 
         // Spawn the tank with authority
@@ -55,6 +64,8 @@ public class Player : NetworkBehaviour
     /// <param name="player">The networked player.</param>
     private void OnPlayerDisconnected(NetworkPlayer player)
     {
+        Network.RemoveRPCs(player);
+        Network.DestroyPlayerObjects(player);
         NetworkServer.Destroy(mTank);
     }
 }

@@ -59,24 +59,33 @@ public class Character : MonoBehaviour
 
                 // --- Acquire a conclusive list of ALL possible moves, given various raycasts
 
+                /* The basic idea is:
+                 * Shoot a ray to the front, back, right, and left of the AI tank at every frame.
+                 * Determine if we collide with an object within 2.0f distance.
+                 * If no, we add it as a possible move in our List.
+                 * */
                 if (!Physics.Raycast(transform.position, Vector3.forward, 2.0f, 1 << 9))
                 {
                     moves.Add(transform.position + Vector3.forward);
                 }
+
                 if (!Physics.Raycast(transform.position, -Vector3.forward, 2.0f, 1 << 9))
                 {
                     moves.Add(transform.position - Vector3.forward);
                 }
+
                 if (!Physics.Raycast(transform.position, -Vector3.right, 2.0f, 1 << 9))
                 {
                     moves.Add(transform.position - Vector3.right);
                 }
+
                 if (!Physics.Raycast(transform.position, Vector3.right, 2.0f, 1 << 9))
                 {
                     moves.Add(transform.position + Vector3.right);
                 }
 
                 // Check which move is best
+                // Check using distances to find which move is closest to our current target (set in AITank.cs)
                 Vector3 best = Vector3.zero;
                 float dist = float.PositiveInfinity;
                 foreach (Vector3 move in moves)
@@ -90,6 +99,7 @@ public class Character : MonoBehaviour
                 }
 
                 // Set direction based on best move
+                // Then align to it
                 dir = (best - this.transform.position).normalized;
                 AlignBehavior(this.transform.position + dir);
             }
@@ -100,6 +110,7 @@ public class Character : MonoBehaviour
 
     /// <summary>
     /// Aligns 'this' enemy tank to a target orientation.
+    /// Uses transform.LookAt
     /// </summary>
     /// <param name="targ">The target to align to.</param>
     private void AlignBehavior(Vector3 targ)
